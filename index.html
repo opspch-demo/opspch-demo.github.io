@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Eliciting Implicit Acoustic Styles from Open-domain Instructions to Facilitate Fine-grained Controllable Generation of Speech</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --max-width: 740px;
+      --bg-page: #fafbfc;
+      --bg-content: #fff;
+      --text-primary: #24292e;
+      --text-secondary: #6a737d;
+      --border: #e1e4e8;
+      --link: #0366d6;
+    }
+  
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif,
+                   "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.6;
+    }
+  
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      background-color: var(--bg-content);
+    }
+  
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 600;
+      margin-bottom: .5rem;
+    }
+  
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+  
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: .3rem;
+    }
+  
+    p {
+      margin-bottom: 1rem;
+    }
+  
+    .toc {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 0;
+      margin-bottom: 2rem;
+    }
+  
+    .toc li {
+      margin: .4rem 0;
+    }
+  
+    .toc a {
+      color: var(--link);
+      text-decoration: none;
+    }
+  
+    .toc a:hover {
+      text-decoration: underline;
+    }
+  
+    /* —— 表格基础样式 —— */
+    table {
+      table-layout: fixed;    /* 固定列宽，按下面的百分比分配 */
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+  
+    thead tr th {
+      text-align: center;
+      padding: .5rem 0;
+      border-bottom: 2px solid var(--border);
+      vertical-align: middle;
+    }
+  
+    tbody tr td {
+      text-align: center;
+      padding: .75rem 0;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      vertical-align: middle;
+    }
+  
+    /* 长词/句自动换行 */
+    thead tr th,
+    tbody tr td {
+      word-break: break-word;
+      white-space: normal;
+    }
+  
+    /* —— 各列宽度 —— */
+    th:nth-child(1),
+    td:nth-child(1) { width: 16%; min-width: 160px; }  /* Voice Print */
+    th:nth-child(2),
+    td:nth-child(2) { width: 24%; }                      /* Speaking Content */
+    th:nth-child(3),
+    td:nth-child(3) { width: 40%; }                      /* Instruction */
+    th:nth-child(4),
+    td:nth-child(4) { width: 20%; min-width: 140px; }    /* Generated Speech */
+  
+    /* —— 音频播放器样式 —— */
+    /* 默认情况下所有 audio 保持 inline-block，并可随列宽缩放 */
+    audio {
+      display: inline-block;
+      width: 90%;
+      max-width: 140px;    /* 根据需要调整播放器最大宽度 */
+      vertical-align: middle;
+    }
+  
+    /* 如果你想更精细地控制第一和第四列，也可以单独写 */
+    /* th:nth-child(1) audio,
+       td:nth-child(1) audio,
+       th:nth-child(4) audio,
+       td:nth-child(4) audio {
+         max-width: 140px;
+       } */
+  
+    .footer {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: .875rem;
+      color: var(--text-secondary);
+    }
+  
+    .footer a {
+      color: var(--link);
+      text-decoration: none;
+    }
+  
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  
+
+</head>
+<body>
+  <div class="container">
+    <!-- 标题区 -->
+    <h1>Eliciting Implicit Acoustic Styles from Open-domain Instructions to Facilitate Fine-grained Controllable Generation of Speech</h1>
+    <div class="subtitle">Anonymous Submission</div>
+  
+    <!-- 摘要 -->
+    <h2 id="abstract">Abstract</h2>
+    <p style="font-size: 1.05rem;">
+      This paper focuses on generating speech with the acoustic style that meets users' needs based on their open-domain instructions. To control the style, early work mostly relies on pre-defined rules or templates. The control types and formats are fixed in a closed domain, making it hard to meet diverse needs of users. One solution is to resort to instructions in free text to guide the generation. Current work mainly studies the instructions that clearly specify the acoustic styles, such as low pitch and fast speed. However, the instructions are complex, some even vague and abstract, such as ``Generate a voice of a woman who is heartbroken due to a breakup.'' It is hard to infer this implicit style by traditional matching-based methods. To address this problem, we propose a new controllable model. It first utilizes multimodal LLMs with knowledge-augmented techniques to infer the desired speech style from the instructions. The powerful language understanding ability of LLMs can help us better elicit the implicit style factors from the instruction. By using these factors as a control condition, we design a diffusion-based generator adept at finely adjusting speech details. That offers higher flexibility to meet complex users' needs. Next, we verify the output speech from three aspects, i.e., consistency of decoding state, mel-spectrogram, and instruction style. This verified feedback can inversely optimize the generator. Extensive experiments are conducted on three popular datasets. The results show the effectiveness and good controllability of our approach. 
+    </p>
+  
+    <!-- 目录 -->
+    <h2 id="contents">Contents</h2>
+    <ul class="toc">
+      <li><a href="#model-overview">Method</a></li>
+      <li><a href="#CloseGenerated Demos">Close-domain Instructions Generated Demos</a></li>
+      <li><a href="#OpenGenerated Demos">Open-domain Instructions Generated Demos</a></li>
+   
+    </ul>
+  
+    <!-- 模型概览 -->
+    <h2 id="model-overview">Method</h2>
+    <p>Close
+      <!-- 简要描述模型 -->
+      Our method leverages multimodal LLMs to infer style factors from instructions, and a diffusion-based generator to synthesize expressive speech.
+    </p>
+    <img src="method.png" alt="Method Diagram" style="max-width: 100%; margin-top: 1rem;">
+
+    <h2 id="CloseGenerated Demos">Close-domain Instruction Generated Demos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Voice Print</th>
+          <th>Speaking Content</th>
+          <th>Close-domain Instruction</th>
+          <th>Generated Speech</th>
+        </tr>
+      </thead>
+      <tbody>
+  
+        <tr>
+          <td>
+            <audio controls>
+              <source src="voice16.wav" type="audio/wav">
+            </audio>
+          </td>
+          <td>
+            Did you hear that noise just now? I think someone's outside.
+          </td>
+          <td>
+            Please speak in a fearful and shaky voice:
+          </td>
+          <td>
+            <audio controls>
+              <source src="demo16.wav" type="audio/wav">
+            </audio>
+          </td>
+        </tr>
+  
+        <tr>
+          <td>
+            <audio controls>
+              <source src="voice17.wav" type="audio/wav">
+            </audio>
+          </td>
+          <td>
+            I can't believe it—we actually won the competition!
+          </td>
+          <td>
+            Please speak in a joyful and energetic woman  voice:
+          </td>
+          <td>
+            <audio controls>
+              <source src="demo17.wav" type="audio/wav">
+            </audio>
+          </td>
+        </tr>
+  
+        
+        <tr>
+          <td>
+            <audio controls>
+              <source src="voice18.wav" type="audio/wav">
+            </audio>
+          </td>
+          <td>
+            Is this really happening right now?
+          </td>
+          <td>
+            Please speak with fast speed, and exciting tone:
+          </td>
+          <td>
+            <audio controls>
+              <source src="demo18.wav" type="audio/wav">
+            </audio>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <audio controls>
+              <source src="voice19.wav" type="audio/wav">
+            </audio>
+          </td>
+          <td>
+            I was really hoping things would turn out differently.
+          </td>
+          <td>
+            Please speak with falling pitch, slow speed, and disappointed tone:
+          </td>
+          <td>
+            <audio controls>
+              <source src="demo19.wav" type="audio/wav">
+            </audio>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <audio controls>
+              <source src="voice20.wav" type="audio/wav">
+            </audio>
+          </td>
+          <td>
+            That was the summer we'll never forget.
+          </td>
+          <td>
+            Please speak with medium pitch, slow speed:
+          </td>
+          <td>
+            <audio controls>
+              <source src="demo20.wav" type="audio/wav">
+            </audio>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  
+    <!-- Demo 样例表 -->
+    <h2 id="OpenGenerated Demos">Open-domain Instructions Generated Demos</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Voice Print</th>
+        <th>Speaking Content</th>
+        <th>Open-domain Instruction</th>
+        <th>Generated Speech</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice1.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          Maybe it's time we end this relationship.
+        </td>
+        <td>
+          Please generate the appropriate voice based on the following scenario, All of this just makes people feel hopeless, like there's a huge weight pressing down on everyone. She said:
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo1.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice2.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          Wow! It's the toy car I wanted most!
+        </td>
+        <td>
+          Please generate a child's excited shout while opening presents on Christmas morning.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo2.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice3.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          She said she was home at eight, but the neighbor saw her return at ten...
+        </td>
+        <td>
+          Please generate a detective analyzing a case alone in a room.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo3.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice4.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          I'm sorry. I shouldn't have said that about you earlier.
+        </td>
+        <td>
+          Please generate a boy apologizing to a friend after an argument.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo4.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice5.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          We believe that the power of technology can change the world.
+        </td>
+        <td>
+          Please generate an scientist expressing their views after a successful experiment.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo5.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice6.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          Mom, I'm sorry. I wasn't the kind of man you hoped I'd be.
+        </td>
+        <td>
+          Please generate a prisoner recording an apology letter to his mother.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo6.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice7.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          When the wind sweeps across the fields, it feels like memories swaying.
+        </td>
+        <td>
+          Please generate a poet describing their feelings in spring.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo7.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice8.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          Did you plan to hide this from me all along? After everything we've built—you think I'm a joke?
+        </td>
+        <td>
+          Please generate a man confronting his partner after discovering a betrayal.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo8.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice9.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          We laughed so much that day. But none of it's coming back.
+        </td>
+        <td>
+          Please generate a woman flipping through old photos alone.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo9.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice10.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          Hope you stay happy always, and never worry about the small stuff.
+        </td>
+        <td>
+          Please generate a girl giving birthday wishes to a close friend.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo10.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice11.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          Why didn't you tell me earlier? Don't you trust me?
+        </td>
+        <td>
+          Please generate a husband confronting his wife after discovering a hidden truth.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo11.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice12.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          We planted trees today! I even gave mine a name!
+        </td>
+        <td>
+          Please generate a child telling parents about an after-school activity.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo12.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice13.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          I can't believe it's me! Thank you, thank you all!
+        </td>
+        <td>
+          Please generate a boy speaking to the audience after winning a big prize on stage.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo13.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice14.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          Not bad. At least I said everything I wanted to.
+        </td>
+        <td>
+          Please generate a young person speaking after walking out of a job interview.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo14.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+
+      <tr>
+        <td>
+          <audio controls>
+            <source src="voice15.wav" type="audio/wav">
+          </audio>
+        </td>
+        <td>
+          You knew the truth back then, and you didn't say a word.
+        </td>
+        <td>
+          Please generate a man expressing dissatisfaction to a former colleague while clenching his fists.
+        </td>
+        <td>
+          <audio controls>
+            <source src="demo15.wav" type="audio/wav">
+          </audio>
+        </td>
+      </tr>
+
+
+      <!-- More rows as needed -->
+
+    </tbody>
+  </table>
+
+
+</body>
+</html>
